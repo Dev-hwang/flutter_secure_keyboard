@@ -5,5 +5,5 @@ enum SecureKeyboardKeyAction {
   CLEAR,
   SHIFT,
   BLANK,
-  SPECIAL_CHARACTERS
+  SPECIAL_CHARACTERS,
 }

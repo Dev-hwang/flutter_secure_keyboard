@@ -2,7 +2,6 @@ package com.pravera.flutter_secure_keyboard
 
 import android.app.Activity
 import android.view.WindowManager
-import androidx.annotation.NonNull
 import com.pravera.flutter_secure_keyboard.errors.ErrorCodes
 
 import io.flutter.plugin.common.BinaryMessenger
@@ -10,12 +9,12 @@ import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 
 /** MethodCallHandlerImpl */
-class MethodCallHandlerImpl: MethodChannel.MethodCallHandler, FlutterSecureKeyboardPluginChannel {
+class MethodCallHandlerImpl : MethodChannel.MethodCallHandler, FlutterSecureKeyboardPluginChannel {
 	private lateinit var channel: MethodChannel
 	
 	private var activity: Activity? = null
 
-	override fun onMethodCall(@NonNull call: MethodCall, @NonNull result: MethodChannel.Result) {
+	override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
 		if (activity == null) {
 			val errorCode = ErrorCodes.ACTIVITY_NOT_ATTACHED
 			result.error(errorCode.toString(), errorCode.message(), null)
@@ -29,7 +28,7 @@ class MethodCallHandlerImpl: MethodChannel.MethodCallHandler, FlutterSecureKeybo
 		}
 	}
 
-	override fun initChannel(messenger: BinaryMessenger) {
+	override fun init(messenger: BinaryMessenger) {
 		channel = MethodChannel(messenger, "flutter_secure_keyboard")
 		channel.setMethodCallHandler(this)
 	}
@@ -38,8 +37,9 @@ class MethodCallHandlerImpl: MethodChannel.MethodCallHandler, FlutterSecureKeybo
 		this.activity = activity
 	}
 
-	override fun disposeChannel() {
-		if (::channel.isInitialized)
+	override fun dispose() {
+		if (::channel.isInitialized) {
 			channel.setMethodCallHandler(null)
+		}
 	}
 }

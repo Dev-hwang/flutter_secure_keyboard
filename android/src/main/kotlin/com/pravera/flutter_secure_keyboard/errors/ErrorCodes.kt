@@ -7,7 +7,7 @@ enum class ErrorCodes {
 	fun message(): String {
 		return when (this) {
 			ACTIVITY_NOT_ATTACHED ->
-				"Activity is not attached to FlutterEngine, so the functionality that uses the Activity is not available."
+				"Cannot call method using Activity because Activity is not attached to FlutterEngine."
 		}
 	}
 }

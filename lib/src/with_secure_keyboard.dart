@@ -1,4 +1,5 @@
 import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:flutter_secure_keyboard/src/secure_keyboard.dart';
@@ -72,7 +73,7 @@ class WithSecureKeyboard extends StatefulWidget {
 
   /// Constructs an instance of [WithSecureKeyboard].
   const WithSecureKeyboard({
-    Key? key,
+    super.key,
     required this.controller,
     required this.child,
     this.keyboardHeight = kKeyboardDefaultHeight,
@@ -89,8 +90,8 @@ class WithSecureKeyboard extends StatefulWidget {
     this.inputTextStyle = kKeyboardDefaultInputTextStyle,
     this.screenCaptureDetectedAlertTitle,
     this.screenCaptureDetectedAlertMessage,
-    this.screenCaptureDetectedAlertActionTitle
-  })  : super(key: key);
+    this.screenCaptureDetectedAlertActionTitle,
+  });
 
   @override
   _WithSecureKeyboardState createState() => _WithSecureKeyboardState();
@@ -109,19 +110,21 @@ class _WithSecureKeyboardState extends State<WithSecureKeyboard> {
   double? _keyBubbleDx;
   double? _keyBubbleDy;
 
-  void _onSecureKeyboardStateChanged() async {
+  void _onSecureKeyboardStateChanged() {
     if (widget.controller.isShowing) {
       // Schedule the secure keyboard to open when the software keyboard is closed.
-      if (_isVisibleSoftwareKeyboard)
+      if (_isVisibleSoftwareKeyboard) {
         _shouldShowSecureKeyboard = true;
+      }
 
       // Hide software keyboard
       FocusScope.of(context).requestFocus(FocusNode());
 
       // If there is a reservation to open the secure keyboard,
       // do not open the secure keyboard immediately.
-      if (!_shouldShowSecureKeyboard)
+      if (!_shouldShowSecureKeyboard) {
         _setSecureKeyboardState(true);
+      }
     } else {
       _setSecureKeyboardState(false);
     }
@@ -154,8 +157,9 @@ class _WithSecureKeyboardState extends State<WithSecureKeyboard> {
       _isVisibleSoftwareKeyboard = visible;
 
       // Prevents opening at the same time as the software keyboard.
-      if (widget.controller.isShowing && visible)
+      if (widget.controller.isShowing && visible) {
         widget.controller.hide();
+      }
 
       // Open the secure keyboard when the software keyboard is closed
       // if there is a reservation to open the secure keyboard.
@@ -178,7 +182,7 @@ class _WithSecureKeyboardState extends State<WithSecureKeyboard> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Expanded(child: widget.child),
-              _secureKeyboardBuilder()
+              _secureKeyboardBuilder(),
             ],
           ),
           _keyBubbleBuilder()
@@ -186,21 +190,21 @@ class _WithSecureKeyboardState extends State<WithSecureKeyboard> {
       ),
     );
   }
-  
+
   Widget _secureKeyboardBuilder() {
     return StreamBuilder<bool>(
       stream: _secureKeyboardStateController.stream.asBroadcastStream(
-        onCancel: (subscription) => subscription.cancel()
+        onCancel: (subscription) => subscription.cancel(),
       ),
       initialData: false,
       builder: (context, snapshot) {
         return (snapshot.data == true)
             ? _buildSecureKeyboard()
             : SizedBox.shrink();
-      }
+      },
     );
   }
-  
+
   Widget _buildSecureKeyboard() {
     final onKeyPressed = widget.controller._onKeyPressed;
     final onCharCodesChanged = widget.controller._onCharCodesChanged;
@@ -233,19 +237,19 @@ class _WithSecureKeyboardState extends State<WithSecureKeyboard> {
       keyTextStyle: widget.keyTextStyle,
       inputTextStyle: widget.inputTextStyle,
       screenCaptureDetectedAlertTitle: widget.screenCaptureDetectedAlertTitle,
-      screenCaptureDetectedAlertMessage: widget.screenCaptureDetectedAlertMessage,
-      screenCaptureDetectedAlertActionTitle: widget.screenCaptureDetectedAlertActionTitle,
+      screenCaptureDetectedAlertMessage:
+          widget.screenCaptureDetectedAlertMessage,
+      screenCaptureDetectedAlertActionTitle:
+          widget.screenCaptureDetectedAlertActionTitle,
       onKeyPressed: onKeyPressed,
       onCharCodesChanged: onCharCodesChanged,
       onDoneKeyPressed: (charCodes) {
         widget.controller.hide();
-        if (onDoneKeyPressed != null)
-          onDoneKeyPressed(charCodes);
+        onDoneKeyPressed?.call(charCodes);
       },
       onCloseKeyPressed: () {
         widget.controller.hide();
-        if (onCloseKeyPressed != null)
-          onCloseKeyPressed();
+        onCloseKeyPressed?.call();
       },
       onStringKeyTouchStart: (keyText, position, constraints) {
         if (widget.controller._disableKeyBubble) return;
@@ -253,7 +257,8 @@ class _WithSecureKeyboardState extends State<WithSecureKeyboard> {
         _keyBubbleText = keyText;
         _keyBubbleWidth = constraints.maxWidth * 1.5;
         _keyBubbleHeight = constraints.maxHeight * 1.5;
-        _keyBubbleDx = position.dx - (constraints.maxWidth / 4) + widget.keySpacing;
+        _keyBubbleDx =
+            position.dx - (constraints.maxWidth / 4) + widget.keySpacing;
         _keyBubbleDy = position.dy - _keyBubbleHeight! - widget.keySpacing;
         _keyBubbleStateController.sink.add(true);
       },
@@ -269,11 +274,11 @@ class _WithSecureKeyboardState extends State<WithSecureKeyboard> {
       },
     );
   }
-  
+
   Widget _keyBubbleBuilder() {
     return StreamBuilder<bool>(
       stream: _keyBubbleStateController.stream.asBroadcastStream(
-        onCancel: (subscription) => subscription.cancel()
+        onCancel: (subscription) => subscription.cancel(),
       ),
       initialData: false,
       builder: (context, snapshot) {
@@ -282,19 +287,19 @@ class _WithSecureKeyboardState extends State<WithSecureKeyboard> {
           keyBubble = Positioned(
             left: _keyBubbleDx,
             top: _keyBubbleDy,
-            child: _buildKeyBubble()
+            child: _buildKeyBubble(),
           );
         } else {
           keyBubble = SizedBox.shrink();
         }
 
         return keyBubble;
-      }
+      },
     );
   }
-  
+
   Widget _buildKeyBubble() {
-    final keyFontSize  = widget.keyTextStyle.fontSize! * 2;
+    final keyFontSize = widget.keyTextStyle.fontSize! * 2;
     final keyTextStyle = widget.keyTextStyle.copyWith(fontSize: keyFontSize);
 
     return Material(
@@ -306,9 +311,9 @@ class _WithSecureKeyboardState extends State<WithSecureKeyboard> {
         alignment: Alignment.center,
         decoration: BoxDecoration(
           color: widget.actionKeyColor,
-          borderRadius: BorderRadius.circular(widget.keyRadius)
+          borderRadius: BorderRadius.circular(widget.keyRadius),
         ),
-        child: Text(_keyBubbleText ?? '', style: keyTextStyle)
+        child: Text(_keyBubbleText ?? '', style: keyTextStyle),
       ),
     );
   }
@@ -368,7 +373,7 @@ class SecureKeyboardController extends ChangeNotifier {
     ValueChanged<SecureKeyboardKey>? onKeyPressed,
     ValueChanged<List<int>>? onCharCodesChanged,
     ValueChanged<List<int>>? onDoneKeyPressed,
-    VoidCallback? onCloseKeyPressed
+    VoidCallback? onCloseKeyPressed,
   }) {
     assert(obscuringCharacter.isNotEmpty);
 

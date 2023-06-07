@@ -5,7 +5,7 @@ import io.flutter.plugin.common.BinaryMessenger
 
 /** FlutterSecureKeyboardPluginChannel */
 interface FlutterSecureKeyboardPluginChannel {
-	fun initChannel(messenger: BinaryMessenger)
+	fun init(messenger: BinaryMessenger)
 	fun setActivity(activity: Activity?)
-	fun disposeChannel()
+	fun dispose()
 }

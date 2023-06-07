@@ -16,7 +16,7 @@ class SecureKeyboardKey {
   const SecureKeyboardKey({
     this.text,
     required this.type,
-    this.action
+    this.action,
   });
 
   /// Generate [SecureKeyboardKey] model from [json].
@@ -24,18 +24,16 @@ class SecureKeyboardKey {
     return SecureKeyboardKey(
       text: json['text'],
       type: json['type'],
-      action: json['action']
+      action: json['action'],
     );
   }
 
   /// Returns the data field of [SecureKeyboardKey] in JSON format.
   Map<String, dynamic> toJson({bool toUpperText = false}) {
     return {
-      'text': toUpperText
-          ? text?.toUpperCase()
-          : text,
+      'text': toUpperText ? text?.toUpperCase() : text,
       'type': type,
-      'action': action
+      'action': action,
     };
   }
 }

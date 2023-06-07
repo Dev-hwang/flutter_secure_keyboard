@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_secure_keyboard/src/secure_keyboard_key_action.dart';
@@ -45,11 +46,11 @@ const TextStyle kKeyboardDefaultInputTextStyle = const TextStyle(
 
 /// The default padding of the key input monitor.
 const EdgeInsetsGeometry kKeyInputMonitorDefaultPadding =
-const EdgeInsets.only(left: 10.0, right: 5.0);
+    const EdgeInsets.only(left: 10.0, right: 5.0);
 
 /// The default padding of the keyboard.
 const EdgeInsetsGeometry kKeyboardDefaultPadding =
-const EdgeInsets.symmetric(horizontal: 5.0);
+    const EdgeInsets.symmetric(horizontal: 5.0);
 
 /// Callback function when the string key touch is started.
 typedef StringKeyTouchStartCallback = void Function(
@@ -178,7 +179,7 @@ class SecureKeyboard extends StatefulWidget {
 
   /// Constructs an instance of [SecureKeyboard].
   const SecureKeyboard({
-    Key? key,
+    super.key,
     required this.type,
     this.onKeyPressed,
     this.onCharCodesChanged,
@@ -211,9 +212,8 @@ class SecureKeyboard extends StatefulWidget {
     this.inputTextStyle = kKeyboardDefaultInputTextStyle,
     this.screenCaptureDetectedAlertTitle,
     this.screenCaptureDetectedAlertMessage,
-    this.screenCaptureDetectedAlertActionTitle
-  })  : assert(obscuringCharacter.length > 0),
-        super(key: key);
+    this.screenCaptureDetectedAlertActionTitle,
+  }) : assert(obscuringCharacter.length > 0);
 
   @override
   _SecureKeyboardState createState() => _SecureKeyboardState();
@@ -235,7 +235,7 @@ class _SecureKeyboardState extends State<SecureKeyboard> {
   bool _isStrongShiftEnabled = false;
   bool _isSpecialCharsEnabled = false;
 
-  void _initStateVariables() {
+  void _initWidgetState() {
     _isViewEnabled = false;
     _isWeakShiftEnabled = false;
     _isStrongShiftEnabled = widget.alwaysCaps == true;
@@ -244,15 +244,22 @@ class _SecureKeyboardState extends State<SecureKeyboard> {
     _definedKeyRows.clear();
     _specialKeyRows.clear();
     _charCodes.clear();
-    if (widget.initText != null)
-      _charCodes.addAll(widget.initText!.codeUnits);
+
+    final initText = widget.initText;
+    if (initText != null) {
+      _charCodes.addAll(initText.codeUnits);
+    }
 
     final keyGenerator = SecureKeyboardKeyGenerator.instance;
-    if (widget.type == SecureKeyboardType.NUMERIC)
-      _definedKeyRows.addAll(keyGenerator.getNumericKeyRows(widget.shuffleNumericKey));
-    else
-      _definedKeyRows.addAll(keyGenerator.getAlphanumericKeyRows(widget.shuffleNumericKey));
-    _specialKeyRows.addAll(SecureKeyboardKeyGenerator.instance.getSpecialCharsKeyRows());
+    if (widget.type == SecureKeyboardType.NUMERIC) {
+      _definedKeyRows
+          .addAll(keyGenerator.getNumericKeyRows(widget.shuffleNumericKey));
+    } else {
+      _definedKeyRows.addAll(
+          keyGenerator.getAlphanumericKeyRows(widget.shuffleNumericKey));
+    }
+    _specialKeyRows
+        .addAll(SecureKeyboardKeyGenerator.instance.getSpecialCharsKeyRows());
   }
 
   void _refreshWidgetState() {
@@ -270,7 +277,8 @@ class _SecureKeyboardState extends State<SecureKeyboard> {
       if (maxLength != null && (maxLength <= _charCodes.length)) return;
 
       // -_- Not good...
-      if (key.text == null) return;
+      final keyText = key.text;
+      if (keyText == null) return;
 
       // Use weak shift once and disable it!
       if (_isWeakShiftEnabled) {
@@ -278,28 +286,27 @@ class _SecureKeyboardState extends State<SecureKeyboard> {
         _refreshWidgetState();
       }
 
-      _charCodes.add(key.text!.codeUnits.first);
+      _charCodes.add(keyText.codeUnits.first);
       _notifyCharCodesChanged();
-      if (widget.onCharCodesChanged != null)
-        widget.onCharCodesChanged!(_charCodes);
+      widget.onCharCodesChanged?.call(_charCodes);
     } else if (key.type == SecureKeyboardKeyType.ACTION) {
       switch (key.action) {
         case SecureKeyboardKeyAction.BACKSPACE:
           if (_charCodes.isNotEmpty) {
             _charCodes.removeLast();
             _notifyCharCodesChanged();
-            if (widget.onCharCodesChanged != null)
-              widget.onCharCodesChanged!(_charCodes);
+            widget.onCharCodesChanged?.call(_charCodes);
           }
           break;
         case SecureKeyboardKeyAction.DONE:
           widget.onDoneKeyPressed(_charCodes);
           break;
         case SecureKeyboardKeyAction.CLEAR:
-          _charCodes.clear();
-          _notifyCharCodesChanged();
-          if (widget.onCharCodesChanged != null)
-            widget.onCharCodesChanged!(_charCodes);
+          if (_charCodes.isNotEmpty) {
+            _charCodes.clear();
+            _notifyCharCodesChanged();
+            widget.onCharCodesChanged?.call(_charCodes);
+          }
           break;
         case SecureKeyboardKeyAction.SHIFT:
           if (!widget.alwaysCaps) {
@@ -324,26 +331,26 @@ class _SecureKeyboardState extends State<SecureKeyboard> {
           return;
       }
     }
-
-    if (widget.onKeyPressed != null)
-      widget.onKeyPressed!(key);
-  }
-
-  @override
-  void didUpdateWidget(covariant SecureKeyboard oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    _initStateVariables();
+    widget.onKeyPressed?.call(key);
   }
 
   @override
   void initState() {
     super.initState();
+    _initWidgetState();
     _channel.invokeMethod('secureModeOn', {
       'screenCaptureDetectedAlertTitle': widget.screenCaptureDetectedAlertTitle,
-      'screenCaptureDetectedAlertMessage': widget.screenCaptureDetectedAlertMessage,
-      'screenCaptureDetectedAlertActionTitle': widget.screenCaptureDetectedAlertActionTitle
+      'screenCaptureDetectedAlertMessage':
+          widget.screenCaptureDetectedAlertMessage,
+      'screenCaptureDetectedAlertActionTitle':
+          widget.screenCaptureDetectedAlertActionTitle,
     });
-    _initStateVariables();
+  }
+
+  @override
+  void didUpdateWidget(covariant SecureKeyboard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _initWidgetState();
   }
 
   @override
@@ -357,19 +364,17 @@ class _SecureKeyboardState extends State<SecureKeyboard> {
       height = widget.height + kKeyInputMonitorHeight;
       keyInputMonitor = Padding(
         padding: widget.keyInputMonitorPadding,
-        child: _buildKeyInputMonitor()
+        child: _buildKeyInputMonitor(),
       );
     }
 
-    final keyRows = _isSpecialCharsEnabled
-        ? _specialKeyRows
-        : _definedKeyRows;
+    final keyRows = _isSpecialCharsEnabled ? _specialKeyRows : _definedKeyRows;
     final keyboard = Padding(
       padding: widget.keyboardPadding,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.end,
         crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: _buildKeyboardKey(keyRows)
+        children: _buildKeyboardKey(keyRows),
       ),
     );
 
@@ -387,8 +392,8 @@ class _SecureKeyboardState extends State<SecureKeyboard> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             keyInputMonitor,
-            keyboard
-          ]
+            keyboard,
+          ],
         ),
       ),
     );
@@ -397,41 +402,41 @@ class _SecureKeyboardState extends State<SecureKeyboard> {
   Widget _buildKeyInputMonitor() {
     return StreamBuilder<List<int>>(
       stream: _charCodesController.stream.asBroadcastStream(
-        onCancel: (subscription) => subscription.cancel()
+        onCancel: (subscription) => subscription.cancel(),
       ),
       initialData: _charCodes,
       builder: (context, snapshot) =>
-          _buildKeyInputMonitorLayout(snapshot.data ?? _charCodes)
+          _buildKeyInputMonitorLayout(snapshot.data ?? _charCodes),
     );
   }
 
   Widget _buildKeyInputMonitorLayout(List<int> charCodes) {
     String secureText;
     TextStyle secureTextStyle;
-
     if (charCodes.isNotEmpty) {
       if (widget.obscureText && !_isViewEnabled) {
         secureText = '';
-        for (var i=0; i<charCodes.length; i++) {
-          if (i == charCodes.length - 1)
+        for (var i = 0; i < charCodes.length; i++) {
+          if (i == charCodes.length - 1) {
             secureText += String.fromCharCode(charCodes[i]);
-          else
+          } else {
             secureText += widget.obscuringCharacter;
+          }
         }
       } else {
         secureText = String.fromCharCodes(charCodes);
       }
-
       secureTextStyle = widget.inputTextStyle;
     } else {
       secureText = widget.hintText ?? '';
-      secureTextStyle = widget.inputTextStyle.copyWith(
-          color: widget.inputTextStyle.color?.withOpacity(0.5));
+      secureTextStyle = widget.inputTextStyle
+          .copyWith(color: widget.inputTextStyle.color?.withOpacity(0.5));
     }
 
     String? lengthSymbol = widget.inputTextLengthSymbol;
-    if (lengthSymbol == null)
+    if (lengthSymbol == null) {
       lengthSymbol = (Platform.localeName == 'ko_KR') ? '자' : 'digit';
+    }
     final lengthText = '${charCodes.length}$lengthSymbol';
 
     return SizedBox(
@@ -443,23 +448,21 @@ class _SecureKeyboardState extends State<SecureKeyboard> {
               secureText,
               style: secureTextStyle,
               maxLines: 1,
-              overflow: TextOverflow.ellipsis
-            )
+              overflow: TextOverflow.ellipsis,
+            ),
           ),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 5.0),
-            child: Text(lengthText, style: widget.keyTextStyle)
+            child: Text(lengthText, style: widget.keyTextStyle),
           ),
-          widget.obscureText
-              ? _buildViewButton()
-              : SizedBox.shrink(),
+          if (widget.obscureText) _buildViewsButton(),
           _buildCloseButton()
         ],
       ),
     );
   }
 
-  Widget _buildViewButton() {
+  Widget _buildViewsButton() {
     return SizedBox(
       width: kKeyInputMonitorHeight / 1.2,
       height: kKeyInputMonitorHeight / 1.2,
@@ -467,13 +470,13 @@ class _SecureKeyboardState extends State<SecureKeyboard> {
         color: Colors.transparent,
         child: InkWell(
           borderRadius: BorderRadius.circular(2.0),
-          onTap: () { },
+          onTap: () {},
           child: GestureDetector(
             behavior: HitTestBehavior.translucent,
             onPanDown: (_) => setState(() => _isViewEnabled = true),
             onPanEnd: (_) => setState(() => _isViewEnabled = false),
-            onPanCancel: ( ) => setState(() => _isViewEnabled = false),
-            child: Icon(Icons.remove_red_eye, color: widget.keyTextStyle.color)
+            onPanCancel: () => setState(() => _isViewEnabled = false),
+            child: Icon(Icons.remove_red_eye, color: widget.keyTextStyle.color),
           ),
         ),
       ),
@@ -489,7 +492,7 @@ class _SecureKeyboardState extends State<SecureKeyboard> {
         child: InkWell(
           borderRadius: BorderRadius.circular(2.0),
           child: Icon(Icons.close, color: widget.keyTextStyle.color),
-          onTap: widget.onCloseKeyPressed
+          onTap: widget.onCloseKeyPressed,
         ),
       ),
     );
@@ -499,25 +502,29 @@ class _SecureKeyboardState extends State<SecureKeyboard> {
     return List.generate(keyRows.length, (int rowNum) {
       return Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: List.generate(keyRows[rowNum].length, (int keyNum) {
-          final key = keyRows[rowNum][keyNum];
+        children: List.generate(
+          keyRows[rowNum].length,
+          (int keyNum) {
+            final key = keyRows[rowNum][keyNum];
 
-          switch (key.type) {
-            case SecureKeyboardKeyType.STRING:
-              return _buildStringKey(key, keyRows.length);
-            case SecureKeyboardKeyType.ACTION:
-              return _buildActionKey(key, keyRows.length);
-            default:
-              throw Exception('Unknown key type.');
-          }
-        })
+            switch (key.type) {
+              case SecureKeyboardKeyType.STRING:
+                return _buildStringKey(key, keyRows.length);
+              case SecureKeyboardKeyType.ACTION:
+                return _buildActionKey(key, keyRows.length);
+              default:
+                throw Exception('Unknown key type.');
+            }
+          },
+        ),
       );
     });
   }
 
   Widget _buildStringKey(SecureKeyboardKey key, int keyRowsLength) {
-    if (_isWeakShiftEnabled || _isStrongShiftEnabled || widget.alwaysCaps)
+    if (_isWeakShiftEnabled || _isStrongShiftEnabled || widget.alwaysCaps) {
       key = SecureKeyboardKey.fromJson(key.toJson(toUpperText: true));
+    }
 
     final keyText = key.text ?? '';
     final keyData = Text(keyText, style: widget.keyTextStyle);
@@ -537,16 +544,15 @@ class _SecureKeyboardState extends State<SecureKeyboard> {
 
             final renderObj = widgetKey.currentContext?.findRenderObject();
             if (renderObj is RenderBox) {
-              final renderPos = renderObj.localToGlobal(Offset.zero);
-              widget.onStringKeyTouchStart!(keyText, renderPos, constraints);
+              final offset = renderObj.localToGlobal(Offset.zero);
+              widget.onStringKeyTouchStart?.call(keyText, offset, constraints);
             }
           },
           onTouchEnd: (constraints) {
             _onKeyPressed(key);
 
             if (widget.type != SecureKeyboardType.ALPHA_NUMERIC) return;
-            if (widget.onStringKeyTouchEnd == null) return;
-            widget.onStringKeyTouchEnd!();
+            widget.onStringKeyTouchEnd?.call();
           },
           child: keyData,
         ),
@@ -561,31 +567,37 @@ class _SecureKeyboardState extends State<SecureKeyboard> {
         keyData = Icon(Icons.backspace, color: widget.keyTextStyle.color);
         break;
       case SecureKeyboardKeyAction.SHIFT:
-        keyData = Icon(Icons.arrow_upward,
-            color: (_isWeakShiftEnabled && !_isStrongShiftEnabled)
-                ? widget.activatedKeyColor ?? widget.doneKeyColor
-                : widget.keyTextStyle.color);
+        keyData = Icon(
+          Icons.arrow_upward,
+          color: (_isWeakShiftEnabled && !_isStrongShiftEnabled)
+              ? widget.activatedKeyColor ?? widget.doneKeyColor
+              : widget.keyTextStyle.color,
+        );
         break;
       case SecureKeyboardKeyAction.CLEAR:
         String? keyText = widget.clearKeyText;
-        if (keyText == null || keyText.isEmpty)
+        if (keyText == null || keyText.isEmpty) {
           keyText = (Platform.localeName == 'ko_KR') ? '초기화' : 'Clear';
-
+        }
         keyData = Text(keyText, style: widget.keyTextStyle);
         break;
       case SecureKeyboardKeyAction.DONE:
         String? keyText = widget.doneKeyText;
-        if (keyText == null || keyText.isEmpty)
+        if (keyText == null || keyText.isEmpty) {
           keyText = (Platform.localeName == 'ko_KR') ? '입력완료' : 'Done';
-
+        }
         keyData = Text(keyText, style: widget.keyTextStyle);
         break;
       case SecureKeyboardKeyAction.SPECIAL_CHARACTERS:
         keyData = Text(
           _isSpecialCharsEnabled
-              ? (_isWeakShiftEnabled || _isStrongShiftEnabled || widget.alwaysCaps ? 'ABC' : 'abc')
+              ? (_isWeakShiftEnabled ||
+                      _isStrongShiftEnabled ||
+                      widget.alwaysCaps
+                  ? 'ABC'
+                  : 'abc')
               : '!@#',
-          style: widget.keyTextStyle
+          style: widget.keyTextStyle,
         );
         break;
       case SecureKeyboardKeyAction.BLANK:
@@ -593,21 +605,23 @@ class _SecureKeyboardState extends State<SecureKeyboard> {
     }
 
     Color keyColor;
-    if (key.action == SecureKeyboardKeyAction.DONE)
+    if (key.action == SecureKeyboardKeyAction.DONE) {
       keyColor = widget.doneKeyColor;
-    else if (key.action == SecureKeyboardKeyAction.SHIFT && (_isStrongShiftEnabled || widget.alwaysCaps))
+    } else if (key.action == SecureKeyboardKeyAction.SHIFT &&
+        (_isStrongShiftEnabled || widget.alwaysCaps)) {
       keyColor = widget.activatedKeyColor ?? widget.doneKeyColor;
-    else
+    } else {
       keyColor = widget.actionKeyColor;
+    }
 
     _KeyboardKeyPressCallback? onLongPressStart;
     _KeyboardKeyPressCallback? onLongPressEnd;
     if (key.action == SecureKeyboardKeyAction.BACKSPACE) {
       onLongPressStart = (constraints) {
         final delay = const Duration(milliseconds: kBackspaceEventDelay);
-        _backspaceEventGenerator = Timer.periodic(delay, (_) => _onKeyPressed(key));
+        _backspaceEventGenerator =
+            Timer.periodic(delay, (_) => _onKeyPressed(key));
       };
-
       onLongPressEnd = (constraints) {
         _backspaceEventGenerator?.cancel();
         _backspaceEventGenerator = null;
@@ -672,7 +686,7 @@ class _KeyboardKeyLayout extends StatefulWidget {
     this.onLongPressStart,
     this.onLongPressEnd,
     required this.child,
-  })  : super(key: key);
+  }) : super(key: key);
 
   @override
   _KeyboardKeyLayoutState createState() => _KeyboardKeyLayoutState();
@@ -685,10 +699,7 @@ class _KeyboardKeyLayoutState extends State<_KeyboardKeyLayout> {
   @override
   Widget build(BuildContext context) {
     final keyChild = InkWell(
-      onTap: () {
-        if (widget.onTap == null) return;
-        widget.onTap!();
-      },
+      onTap: widget.onTap,
       onTapCancel: () {
         _isTapCanceled = true;
       },
@@ -725,36 +736,31 @@ class _KeyboardKeyLayoutState extends State<_KeyboardKeyLayout> {
               _isTapCanceled = false;
               _isKeyPressing = true;
             });
-
-            if (widget.onTouchStart != null)
-              widget.onTouchStart!(constraints);
+            widget.onTouchStart?.call(constraints);
           },
           onPanCancel: () {
             if (_isTapCanceled && widget.onLongPressEnd != null) return;
             setState(() => _isKeyPressing = false);
-
-            if (widget.onTouchEnd != null)
-              widget.onTouchEnd!(constraints);
+            widget.onTouchEnd?.call(constraints);
           },
           onPanEnd: (_) {
             if (_isTapCanceled && widget.onLongPressEnd != null) return;
             setState(() => _isKeyPressing = false);
-
-            if (widget.onTouchEnd != null)
-              widget.onTouchEnd!(constraints);
+            widget.onTouchEnd?.call(constraints);
           },
-          onLongPressStart: widget.onLongPressStart == null ? null : (_) {
-            widget.onLongPressStart!(constraints);
-          },
-          onLongPressEnd: widget.onLongPressEnd == null ? null : (_) {
-            setState(() {
-              _isTapCanceled = false;
-              _isKeyPressing = false;
-            });
-
-            widget.onLongPressEnd!(constraints);
-            if (widget.onTouchEnd != null) widget.onTouchEnd!(constraints);
-          },
+          onLongPressStart: widget.onLongPressStart == null
+              ? null
+              : (_) => widget.onLongPressStart?.call(constraints),
+          onLongPressEnd: widget.onLongPressEnd == null
+              ? null
+              : (_) {
+                  setState(() {
+                    _isTapCanceled = false;
+                    _isKeyPressing = false;
+                  });
+                  widget.onLongPressEnd?.call(constraints);
+                  widget.onTouchEnd?.call(constraints);
+                },
           child: keyChild,
         );
       },
