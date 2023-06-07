@@ -168,15 +168,6 @@ class SecureKeyboard extends StatefulWidget {
   /// Default value is `const TextStyle(color: Colors.white, fontSize: 17.0, fontWeight: FontWeight.w500)`.
   final TextStyle inputTextStyle;
 
-  /// Security Alert title, only works on iOS.
-  final String? screenCaptureDetectedAlertTitle;
-
-  /// Security Alert message, only works on iOS.
-  final String? screenCaptureDetectedAlertMessage;
-
-  /// Security Alert actionTitle, only works on iOS.
-  final String? screenCaptureDetectedAlertActionTitle;
-
   /// Constructs an instance of [SecureKeyboard].
   const SecureKeyboard({
     super.key,
@@ -210,9 +201,6 @@ class SecureKeyboard extends StatefulWidget {
     this.activatedKeyColor,
     this.keyTextStyle = kKeyboardDefaultKeyTextStyle,
     this.inputTextStyle = kKeyboardDefaultInputTextStyle,
-    this.screenCaptureDetectedAlertTitle,
-    this.screenCaptureDetectedAlertMessage,
-    this.screenCaptureDetectedAlertActionTitle,
   }) : assert(obscuringCharacter.length > 0);
 
   @override
@@ -338,13 +326,7 @@ class _SecureKeyboardState extends State<SecureKeyboard> {
   void initState() {
     super.initState();
     _initWidgetState();
-    _channel.invokeMethod('secureModeOn', {
-      'screenCaptureDetectedAlertTitle': widget.screenCaptureDetectedAlertTitle,
-      'screenCaptureDetectedAlertMessage':
-          widget.screenCaptureDetectedAlertMessage,
-      'screenCaptureDetectedAlertActionTitle':
-          widget.screenCaptureDetectedAlertActionTitle,
-    });
+    _channel.invokeMethod('secureModeOn');
   }
 
   @override
