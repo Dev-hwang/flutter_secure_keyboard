@@ -13,7 +13,7 @@ To use this plugin, add `flutter_secure_keyboard` as a [dependency in your pubsp
 
 ```yaml
 dependencies:
-  flutter_secure_keyboard: ^2.2.2
+  flutter_secure_keyboard: ^3.0.0
 ```
 
 ## Examples
@@ -21,7 +21,8 @@ dependencies:
 ```dart
 class WithSecureKeyboardExample extends StatefulWidget {
   @override
-  _WithSecureKeyboardExampleState createState() => _WithSecureKeyboardExampleState();
+  _WithSecureKeyboardExampleState createState() =>
+      _WithSecureKeyboardExampleState();
 }
 
 class _WithSecureKeyboardExampleState extends State<WithSecureKeyboardExample> {
@@ -40,8 +41,10 @@ class _WithSecureKeyboardExampleState extends State<WithSecureKeyboardExample> {
     return WithSecureKeyboard(
       controller: _secureKeyboardController,
       child: Scaffold(
-        appBar: AppBar(title: Text('with_secure_keyboard_example')),
-        body: _buildContentView()
+        appBar: AppBar(
+          title: Text('flutter_secure_keyboard'),
+        ),
+        body: _buildContentView(),
       ),
     );
   }
@@ -53,7 +56,7 @@ class _WithSecureKeyboardExampleState extends State<WithSecureKeyboardExample> {
       children: [
         _buildPasswordTextField(),
         SizedBox(height: 12.0),
-        _buildPinCodeTextField()
+        _buildPinCodeTextField(),
       ],
     );
   }
@@ -78,7 +81,7 @@ class _WithSecureKeyboardExampleState extends State<WithSecureKeyboardExample> {
               // Use onCharCodesChanged to have text entered in real time.
               onCharCodesChanged: (List<int> charCodes) {
                 _passwordEditor.text = String.fromCharCodes(charCodes);
-              }
+              },
             );
           },
         ),
@@ -107,12 +110,20 @@ class _WithSecureKeyboardExampleState extends State<WithSecureKeyboardExample> {
               // or to do something like encryption.
               onDoneKeyPressed: (List<int> charCodes) {
                 _pinCodeEditor.text = String.fromCharCodes(charCodes);
-              }
+              },
             );
           },
         ),
       ],
     );
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _secureKeyboardController.dispose();
+    _passwordEditor.dispose();
+    _pinCodeEditor.dispose();
   }
 }
 ```
@@ -142,9 +153,6 @@ class _WithSecureKeyboardExampleState extends State<WithSecureKeyboardExample> {
 | `activatedKeyColor` | The key color when the shift action key is activated. If the value is null, `doneKeyColor` is used. |
 | `keyTextStyle` | The text style of the text inside the keyboard key. <br> Default value is `const TextStyle(color: Colors.white, fontSize: 17.0, fontWeight: FontWeight.w500)`. |
 | `inputTextStyle` | The text style of the text inside the key input monitor. <br> Default value is `const TextStyle(color: Colors.white, fontSize: 17.0, fontWeight: FontWeight.w500)`. |
-| `screenCaptureDetectedAlertTitle` | Security Alert title, only works on iOS. |
-| `screenCaptureDetectedAlertMessage` | Security Alert message, only works on iOS |
-| `screenCaptureDetectedAlertActionTitle` | Security Alert actionTitle, only works on iOS. |
 
 ### SecureKeyboardController
 
