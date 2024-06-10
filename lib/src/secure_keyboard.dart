@@ -347,11 +347,15 @@ class _SecureKeyboardState extends State<SecureKeyboard> {
       );
     }
 
+    // safe area
+    final double bottomPadding = MediaQuery.of(context).padding.bottom;
+    height += bottomPadding;
+
     final keyRows = _isSpecialCharsEnabled ? _specialKeyRows : _definedKeyRows;
     final keyboard = Padding(
       padding: widget.keyboardPadding,
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.end,
+        mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: _buildKeyboardKey(keyRows),
       ),
@@ -367,7 +371,7 @@ class _SecureKeyboardState extends State<SecureKeyboard> {
         height: height,
         color: widget.backgroundColor,
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.end,
+          mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             keyInputMonitor,
