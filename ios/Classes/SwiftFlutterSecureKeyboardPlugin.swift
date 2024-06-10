@@ -3,18 +3,18 @@ import UIKit
 
 public class SwiftFlutterSecureKeyboardPlugin: NSObject, FlutterPlugin {
   private var methodChannel: FlutterMethodChannel?
-  private var secureView: UITextField?
+  private var secureField: UITextField?
   
   var isScreenCapturable: Bool {
     get {
-      return secureView?.isSecureTextEntry == false
+      return secureField?.isSecureTextEntry == false
     }
   }
   
   public static func register(with registrar: FlutterPluginRegistrar) {
     let instance = SwiftFlutterSecureKeyboardPlugin()
     instance.initChannels(registrar.messenger())
-    instance.initSecureView()
+    instance.initSecureField()
     registrar.addApplicationDelegate(instance)
   }
   
@@ -23,24 +23,29 @@ public class SwiftFlutterSecureKeyboardPlugin: NSObject, FlutterPlugin {
     methodChannel?.setMethodCallHandler(onMethodCall)
   }
   
-  private func initSecureView() {
+  private func initSecureField() {
     if let window = UIApplication.shared.delegate?.window! {
-      secureView = UITextField()
-      window.addSubview(secureView!)
-      secureView!.centerXAnchor.constraint(equalTo: window.centerXAnchor).isActive = true
-      secureView!.centerYAnchor.constraint(equalTo: window.centerYAnchor).isActive = true
-      window.layer.superlayer?.addSublayer(secureView!.layer)
-      secureView!.layer.sublayers?.first?.addSublayer(window.layer)
+      let tf = UITextField()
+      let uv = UIView(frame: CGRect(x: 0, y: 0, width: tf.frame.self.width, height: tf.frame.self.height))
+      let iv = UIImageView(image: UIImage())
+      iv.frame = CGRect(x: 0, y: 0, width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height)
+      window.addSubview(tf)
+      uv.addSubview(iv)
+      window.layer.superlayer?.addSublayer(tf.layer)
+      tf.layer.sublayers?.last?.addSublayer(window.layer)
+      tf.leftView = uv
+      tf.leftViewMode = .always
+      self.secureField = tf
     }
   }
   
   private func onMethodCall(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
     switch call.method {
       case "secureModeOn":
-        secureView?.isSecureTextEntry = true
+        secureField?.isSecureTextEntry = true
         break
       case "secureModeOff":
-        secureView?.isSecureTextEntry = false
+        secureField?.isSecureTextEntry = false
         break
       default:
         result(FlutterMethodNotImplemented)
