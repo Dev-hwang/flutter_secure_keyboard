@@ -3,8 +3,8 @@ Mobile secure keyboard to prevent KeyLogger attack and screen capture.
 [![pub package](https://img.shields.io/pub/v/flutter_secure_keyboard.svg)](https://pub.dev/packages/flutter_secure_keyboard)
 
 ## Screenshots
-| Alphanumeric | Numeric |
-|---|---|
+| Alphanumeric                                                                                                                  | Numeric                                                                                                                       |
+|-------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------|
 | <img src="https://user-images.githubusercontent.com/47127353/111059243-52fbc980-84d7-11eb-9260-01b6b7b5909c.png" width="200"> | <img src="https://user-images.githubusercontent.com/47127353/111059256-7888d300-84d7-11eb-8797-89a69337d8ad.png" width="200"> |
 
 ## Getting started
@@ -13,7 +13,7 @@ To use this plugin, add `flutter_secure_keyboard` as a [dependency in your pubsp
 
 ```yaml
 dependencies:
-  flutter_secure_keyboard: ^3.0.0
+  flutter_secure_keyboard: ^4.0.0
 ```
 
 ## Examples

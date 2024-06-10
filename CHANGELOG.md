@@ -1,3 +1,11 @@
+## 4.0.0
+
+* [**FEAT**] Support AGP 8
+* [**FEAT**] Add ability for the keyboard to be rendered considering SafeArea
+* [**FIX**] Fixed an issue where shift was not released when typing in weak shift state
+* [**FIX**] Fixed an issue where screen capture was possible on iOS 17+
+* [**CHORE**] Upgrade dependencies
+
 ## 3.0.0
 
 * [**CHORE**] Update dependency constraints to `sdk: '>=2.18.0 <4.0.0'` `flutter: '>=3.3.0'`
