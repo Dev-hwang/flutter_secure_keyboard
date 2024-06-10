@@ -301,9 +301,6 @@ class _SecureKeyboardState extends State<SecureKeyboard> {
             if (_isStrongShiftEnabled) {
               _isWeakShiftEnabled = false;
               _isStrongShiftEnabled = false;
-            } else if (_isWeakShiftEnabled) {
-              _isWeakShiftEnabled = false;
-              _isStrongShiftEnabled = true;
             } else {
               _isWeakShiftEnabled = !_isWeakShiftEnabled;
             }
